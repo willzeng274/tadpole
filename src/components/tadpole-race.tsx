@@ -13,7 +13,6 @@ interface TadpolePoolEntry {
   color: string
 }
 
-// Fun tadpole names and their colors
 const TADPOLE_POOL: TadpolePoolEntry[] = [
   { name: "Speedy", color: "#3498db" },
   { name: "Zippy", color: "#e74c3c" },
@@ -83,7 +82,7 @@ export default function TadpoleRaceSimulator() {
         position: undefined
       })))
       raceStartTimeRef.current = Date.now()
-      positionCounterRef.current = 1 // Reset position counter
+      positionCounterRef.current = 1
       setRaceFinished(false)
       finishedTadpolesRef.current.clear()
     }
@@ -123,7 +122,7 @@ export default function TadpoleRaceSimulator() {
   }, [])
 
   const handleNumTadpolesChange = (value: number[]) => {
-    if (isRunning) return // Don't allow changes during race
+    if (isRunning) return
     const newCount = value[0]
     setNumTadpoles(newCount)
     setTadpoles(
@@ -240,7 +239,7 @@ export default function TadpoleRaceSimulator() {
 
       {raceFinished && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                      bg-black/80 text-white p-6 rounded-lg min-w-[300px]">
+                      bg-black/80 text-white p-6 rounded-lg min-w-[300px] z-[99999999]">
           <h2 className="text-2xl font-bold mb-4 text-center">Race Results</h2>
           <div className="space-y-3 mb-4">
             {tadpoles
@@ -324,89 +323,69 @@ interface RaceCourseProps {
 }
 
 function RaceCourse({ children, isRunning, registerFinish }: RaceCourseProps) {
-  // Create an enhanced spiral race track with extreme roller coaster elements
   const path = useMemo(() => {
     const points = [];
-    const segments = 40; // More segments for a longer track with more features
-    const baseRadius = 15; // Base radius for the track
+    const segments = 40;
+    const baseRadius = 15;
     
-    // Create an extended spiral path with roller coaster elements
     for (let i = 0; i <= segments; i++) {
       const t = i / segments;
       
-      // Base spiral rotation
-      const angle = t * Math.PI * 6; // 3 full rotations
-      
-      // Radius with growth and pinch points
+      const angle = t * Math.PI * 6;
+
       let radiusMultiplier = 1 + t * 0.8;
-      // Add some pinch points where the track gets narrower for more excitement
+
       radiusMultiplier *= 1 - 0.3 * Math.exp(-Math.pow(t * 10 - 2, 2) * 2);
       radiusMultiplier *= 1 - 0.3 * Math.exp(-Math.pow(t * 10 - 5, 2) * 2);
-      
-      // X and Z follow spiral pattern with modifications
+
       const x = Math.cos(angle) * baseRadius * radiusMultiplier;
       
-      // Y uses more extreme elevation changes for roller coaster feel
-      // Base upward trend with much higher amplitude
       const baseHeight = t * 20 - 10; 
-      
+
       // ROLLER COASTER ELEMENTS:
       
-      // 1. Major hills and drops - extreme height changes
       const hills = Math.sin(t * Math.PI * 3) * 8;
       
-      // 2. Corkscrew effect - rapid height + twisting displacement
-      // Only apply corkscrew in middle section (t between 0.3 and 0.6)
       const corkscrewIntensity = Math.max(0, 1 - Math.pow((t - 0.45) * 3.5, 2)) * 6;
       const corkscrew = Math.sin(t * Math.PI * 20) * corkscrewIntensity;
       
-      // 3. Loop-de-loop - dramatic vertical loop near t=0.75
       const loopIntensity = Math.max(0, 1 - Math.pow((t - 0.75) * 5, 2)) * 15;
       const loop = Math.sin(t * Math.PI * 8) * loopIntensity;
       
-      // 4. Final drop - steep descent in the final section
       const finalDrop = t > 0.85 ? -20 * (t - 0.85) : 0;
       
-      // Combine all elements
       const y = baseHeight + hills + corkscrew + loop + finalDrop;
       
-      // Z coordinate with some offset for corkscrew sections
       const z = Math.sin(angle) * baseRadius * radiusMultiplier + 
                 (Math.sin(t * Math.PI * 20) * corkscrewIntensity * 0.4);
 
       points.push(new THREE.Vector3(x, y, z));
     }
 
-    // Add controlled random variations to make it more interesting
     for (let i = 1; i < points.length - 1; i++) {
-      if (i % 5 === 0) continue; // Keep more points fixed for structure
+      if (i % 5 === 0) continue;
       
-      // Use sine-based pseudo-random variations
       const seed1 = Math.sin(i * 0.573) * 10000;
       const seed2 = Math.cos(i * 0.573) * 10000;
       const seed3 = Math.sin(i * 0.873) * 10000;
       
-      // Extract fractional parts for smooth pseudo-random values
       const rx = (seed1 - Math.floor(seed1)) - 0.5;
       const ry = (seed2 - Math.floor(seed2)) - 0.5;
       const rz = (seed3 - Math.floor(seed3)) - 0.5;
       
-      // Add variations - smaller in Y for better control of vertical elements
       const variationScale = Math.sin(Math.PI * i / points.length) * 2;
       points[i].x += rx * variationScale;
-      points[i].y += ry * variationScale * 0.5; // Less Y variation for better roller coaster control
+      points[i].y += ry * variationScale * 0.5;
       points[i].z += rz * variationScale;
     }
 
     return new THREE.CatmullRomCurve3(points, false, 'centripetal');
   }, []);
 
-  // Create tube segments with better colors and transitions
   const tubeSegments = useMemo(() => {
     const segments: TubeSegment[] = [];
-    const totalSegments = 8; // Reduced from 10 to 8 segments
+    const totalSegments = 8;
 
-    // Create a nice blue gradient with lighter colors
     const colors = [
       "#2196f3", // Light blue
       "#42a5f5", // Lighter blue
@@ -423,7 +402,7 @@ function RaceCourse({ children, isRunning, registerFinish }: RaceCourseProps) {
       const t2 = (i + 1) / totalSegments;
 
       const subPoints = [];
-      const steps = 20; // Reduced from 30 to 20 steps for better performance
+      const steps = 20;
 
       for (let j = 0; j <= steps; j++) {
         const t = t1 + (t2 - t1) * (j / steps);
@@ -456,22 +435,23 @@ function RaceCourse({ children, isRunning, registerFinish }: RaceCourseProps) {
         {tubeSegments.map((segment) => (
           <Tube key={segment.id} args={[segment.curve, 32, segment.thickness, 8, false]}>
             <MeshTransmissionMaterial
-              backside={false}
-              samples={2}
-              thickness={0.2}
-              roughness={0.2}
-              clearcoat={0.1}
-              clearcoatRoughness={0.2}
-              transmission={0.9}
-              chromaticAberration={0.05}
-              anisotropy={0.2}
+              backside
+              samples={4}
+              thickness={0.4}
+              roughness={0.1}
+              clearcoat={0.2}
+              clearcoatRoughness={0.1}
+              transmission={0.96}
+              chromaticAberration={0.1}
+              anisotropy={0.5}
               color={segment.color}
-              distortion={0.05}
-              distortionScale={0.1}
-              temporalDistortion={0.05}
-              opacity={0.9}
+              distortion={0.1}
+              distortionScale={0.2}
+              temporalDistortion={0.1}
+              opacity={0.8}
               transparent={true}
-              resolution={256}
+              // this is VERY important to set to 512
+              resolution={512}
               attenuationDistance={0.5}
               attenuationColor="#ffffff"
             />
@@ -497,10 +477,9 @@ function Tadpole({ id, name, color, isSelected }: TadpoleProps) {
   const hasFinishedRef = useRef<boolean>(false)
   const lapCountRef = useRef<number>(0)
 
-  // Create a lighter version of the color
   const lighterColor = useMemo(() => {
     const c = new THREE.Color(color)
-    c.multiplyScalar(1.5) // Make it 50% brighter
+    c.multiplyScalar(1.5)
     return c
   }, [color])
 
@@ -679,8 +658,7 @@ function CameraSystem({ viewMode, selectedTadpole, cameraReset }: CameraSystemPr
         if (initialTadpoleViewRef.current) {
           // @ts-expect-error - OrbitControls has a target property at runtime
           tadpoleControlsRef.current.target.copy(tadpolePos);
-          
-          // Set initial camera position behind and slightly above the tadpole
+
           cameraOffset.current.set(0, 3, 6);
           
           camera.position.copy(tadpolePos).add(cameraOffset.current);
