@@ -473,7 +473,7 @@ interface TadpoleProps {
 function Tadpole({ id, name, color, isSelected }: TadpoleProps) {
   const ref = useRef<THREE.Group>(null)
   const progressRef = useRef<number>(0)
-  const speedRef = useRef<number>(0.0004 + Math.random() * 0.0002)
+  const speedRef = useRef<number>(0.0008 + Math.random() * 0.0004)
   const hasFinishedRef = useRef<boolean>(false)
   const lapCountRef = useRef<number>(0)
 
@@ -501,7 +501,7 @@ function Tadpole({ id, name, color, isSelected }: TadpoleProps) {
       }
 
       if (Math.random() < 0.01) {
-        speedRef.current = 0.0004 + Math.random() * 0.0002
+        speedRef.current = 0.0008 + Math.random() * 0.0004
       }
     }
 
