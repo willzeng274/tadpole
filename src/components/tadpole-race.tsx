@@ -140,7 +140,16 @@ export default function TadpoleRaceSimulator() {
 
   return (
     <div className="relative w-full h-screen">
-      <Canvas shadows gl={{ antialias: true }}>
+      <Canvas
+        shadows={false}
+        // gl={{
+        //   antialias: false,
+        //   powerPreference: "high-performance",
+        //   alpha: false,
+        // }}
+        // dpr={[1, 1.5]}
+        // performance={{ min: 0.5 }}
+      >
         <Perf />
         <RaceScene
           tadpoles={tadpoles}
@@ -288,8 +297,8 @@ function RaceScene({ tadpoles, selectedTadpole, viewMode, isRunning, cameraReset
   return (
     <>
       <Environment preset="apartment" />
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[10, 10, 5]} intensity={0.8} />
 
       <RaceCourse isRunning={isRunning} registerFinish={registerFinish}>
         {tadpoles.map((tadpole) => (
@@ -395,7 +404,7 @@ function RaceCourse({ children, isRunning, registerFinish }: RaceCourseProps) {
   // Create tube segments with better colors and transitions
   const tubeSegments = useMemo(() => {
     const segments: TubeSegment[] = [];
-    const totalSegments = 10; // More segments for smoother color transitions
+    const totalSegments = 8; // Reduced from 10 to 8 segments
 
     // Create a nice blue gradient with lighter colors
     const colors = [
@@ -403,8 +412,6 @@ function RaceCourse({ children, isRunning, registerFinish }: RaceCourseProps) {
       "#42a5f5", // Lighter blue
       "#64b5f6", // Even lighter blue
       "#90caf9", // Very light blue
-      "#bbdefb", // Extremely light blue
-      "#bbdefb", // Extremely light blue
       "#90caf9", // Very light blue
       "#64b5f6", // Even lighter blue
       "#42a5f5", // Lighter blue
@@ -416,7 +423,7 @@ function RaceCourse({ children, isRunning, registerFinish }: RaceCourseProps) {
       const t2 = (i + 1) / totalSegments;
 
       const subPoints = [];
-      const steps = 30; // Good balance of smoothness and performance
+      const steps = 20; // Reduced from 30 to 20 steps for better performance
 
       for (let j = 0; j <= steps; j++) {
         const t = t1 + (t2 - t1) * (j / steps);
@@ -427,7 +434,7 @@ function RaceCourse({ children, isRunning, registerFinish }: RaceCourseProps) {
         id: i,
         curve: new THREE.CatmullRomCurve3(subPoints, false),
         color: colors[i % colors.length],
-        thickness: 0.9 + Math.sin(i / totalSegments * Math.PI) * 0.2, // Increased base thickness from 0.7 to 0.9
+        thickness: 0.9 + Math.sin(i / totalSegments * Math.PI) * 0.2,
       });
     }
 
@@ -447,23 +454,26 @@ function RaceCourse({ children, isRunning, registerFinish }: RaceCourseProps) {
     <RaceContext.Provider value={contextValue}>
       <group>
         {tubeSegments.map((segment) => (
-          <Tube key={segment.id} args={[segment.curve, 64, segment.thickness, 16, false]}>
+          <Tube key={segment.id} args={[segment.curve, 32, segment.thickness, 8, false]}>
             <MeshTransmissionMaterial
-              backside
-              samples={4}
-              thickness={0.4}
-              roughness={0.1}
-              clearcoat={0.2}
-              clearcoatRoughness={0.1}
-              transmission={0.96}
-              chromaticAberration={0.1}
-              anisotropy={0.5}
+              backside={false}
+              samples={2}
+              thickness={0.2}
+              roughness={0.2}
+              clearcoat={0.1}
+              clearcoatRoughness={0.2}
+              transmission={0.9}
+              chromaticAberration={0.05}
+              anisotropy={0.2}
               color={segment.color}
-              distortion={0.1}
-              distortionScale={0.2}
-              temporalDistortion={0.1}
-              opacity={0.8}
+              distortion={0.05}
+              distortionScale={0.1}
+              temporalDistortion={0.05}
+              opacity={0.9}
               transparent={true}
+              resolution={256}
+              attenuationDistance={0.5}
+              attenuationColor="#ffffff"
             />
           </Tube>
         ))}
