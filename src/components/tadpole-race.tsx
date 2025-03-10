@@ -901,6 +901,29 @@ function RaceCourse({ children, isRunning, registerFinish }: RaceCourseProps) {
             />
           </Tube>
         ))}
+        <mesh position={[path.getPoint(1).x + 1, path.getPoint(1).y, path.getPoint(1).z + 4]}>
+          <sphereGeometry args={[5, 32, 32]} />
+          <MeshTransmissionMaterial
+            backside
+            samples={4}
+            thickness={0.4}
+            roughness={0.1}
+            clearcoat={0.2}
+            clearcoatRoughness={0.1}
+            transmission={0.96}
+            chromaticAberration={0.1}
+            anisotropy={0.5}
+            color="#ff69b4"
+            distortion={0.1}
+            distortionScale={0.2}
+            temporalDistortion={0.1}
+            opacity={0.8}
+            transparent={true}
+            resolution={512}
+            attenuationDistance={0.5}
+            attenuationColor="#ffffff"
+          />
+        </mesh>
       </group>
       {children}
     </RaceContext.Provider>
